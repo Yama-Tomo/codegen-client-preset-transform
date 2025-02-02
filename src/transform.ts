@@ -1,6 +1,7 @@
 import { parse as parseGql } from 'graphql'
 import MagicString from 'magic-string'
 import * as ts from 'typescript'
+import { documentNodeFilePath } from './util'
 
 const IMPORT_ITEM_PREFIX = '_transformed_'
 
@@ -54,9 +55,10 @@ const inlineGraphqlCall = (
   const operationOrFragmentNameWithPrefix = IMPORT_ITEM_PREFIX + operationOrFragmentName
 
   transformData.codes.push({ from: graphqlCallExpression, to: operationOrFragmentNameWithPrefix })
-  transformData.importItems.push(
-    `${operationOrFragmentName} as ${operationOrFragmentNameWithPrefix}`,
-  )
+  transformData.importItems.push({
+    name: operationOrFragmentName,
+    alias: operationOrFragmentNameWithPrefix,
+  })
 }
 
 const inlineUseFragmentCall = (
@@ -76,9 +78,13 @@ const inlineUseFragmentCall = (
 }
 
 type TransformData = {
-  importItems: string[]
+  importItems: { name: string; alias: string }[]
   codes: { from: string; to: string }[]
 }
+
+type CodeGenerationDirectory = string
+type DocumentNodeDictionary = Record<string, unknown>
+export type Artifact = CodeGenerationDirectory | DocumentNodeDictionary
 
 export type TransformOptions = {
   graphqlFunctionName?: string
@@ -91,7 +97,7 @@ export const transformOptionsDefault = {
 } satisfies TransformOptions
 
 export const transform = (
-  { code, artifactDirectory }: { code: string; artifactDirectory: string },
+  { code, artifact }: { code: string; artifact: Artifact },
   optionsArg?: TransformOptions,
 ) => {
   const options = { ...transformOptionsDefault, ...optionsArg }
@@ -115,9 +121,23 @@ export const transform = (
 
   const magicString = new MagicString(code)
   if (transformData.importItems.length) {
-    magicString.prepend(
-      `import { ${transformData.importItems.join(', ')} } from '${artifactDirectory}'\n`,
-    )
+    if (typeof artifact === 'string') {
+      const importItems = transformData.importItems.map(({ name, alias }) => `${name} as ${alias}`)
+
+      magicString.prepend(
+        `import { ${importItems.join(', ')} } from '${documentNodeFilePath(artifact)}'\n`,
+      )
+    } else {
+      const variableDeclarations = transformData.importItems
+        .map(({ name, alias }) => {
+          if (!artifact[name]) throw new Error(`Could not find "${name}" in the artifact`)
+
+          return `const ${alias} = ${JSON.stringify(artifact[name])}`
+        })
+        .join('\n')
+
+      magicString.prepend(`${variableDeclarations}\n`)
+    }
   }
   for (const { from, to } of transformData.codes) {
     magicString.replace(from, to)
