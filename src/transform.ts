@@ -84,23 +84,23 @@ type TransformData = {
 
 type CodeGenerationDirectory = string
 type DocumentNodeDictionary = Record<string, unknown>
-export type Artifact = CodeGenerationDirectory | DocumentNodeDictionary
+type Artifact = CodeGenerationDirectory | DocumentNodeDictionary
 
-export type TransformOptions = {
+type Options = {
   graphqlFunctionName?: string
   useFragmentFunctionName?: string
 }
 
-export const transformOptionsDefault = {
+const optionsDefault = {
   graphqlFunctionName: 'graphql',
   useFragmentFunctionName: 'useFragment',
-} satisfies TransformOptions
+} satisfies Options
 
 export const transform = (
   { code, artifact }: { code: string; artifact: Artifact },
-  optionsArg?: TransformOptions,
+  optionsArg?: Options,
 ) => {
-  const options = { ...transformOptionsDefault, ...optionsArg }
+  const options = { ...optionsDefault, ...optionsArg }
   const transformData: TransformData = { importItems: [], codes: [] }
 
   const sourceFile = ts.createSourceFile('', code, ts.ScriptTarget.Latest, true)
@@ -144,4 +144,9 @@ export const transform = (
   }
 
   return magicString
+}
+transform.optionsDefault = optionsDefault
+
+export declare namespace transform {
+  export type { Options, Artifact }
 }

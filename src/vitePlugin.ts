@@ -1,11 +1,6 @@
 import type { PluginContext } from 'rollup'
 import type { FilterPattern, Plugin } from 'vite'
-import {
-  type Artifact,
-  type TransformOptions,
-  transform,
-  transformOptionsDefault,
-} from './transform'
+import { transform } from './transform'
 import { documentNodeFilePath } from './util'
 
 type Context = Pick<PluginContext, 'load' | 'resolve'>
@@ -26,7 +21,7 @@ const getDocumentNodeDictionary = async (
   return import(`data:text/javascript;base64,${btoa(modInfo.code)}`)
 }
 
-export type VitePluginOptions = TransformOptions & {
+type Options = transform.Options & {
   artifactDirectory: string
   include?: FilterPattern
   exclude?: FilterPattern
@@ -34,15 +29,15 @@ export type VitePluginOptions = TransformOptions & {
 }
 
 export const vitePlugin = ({
-  useFragmentFunctionName = transformOptionsDefault.useFragmentFunctionName,
-  graphqlFunctionName = transformOptionsDefault.graphqlFunctionName,
+  useFragmentFunctionName = transform.optionsDefault.useFragmentFunctionName,
+  graphqlFunctionName = transform.optionsDefault.graphqlFunctionName,
   disableProductionBuildOptimization = false,
   artifactDirectory,
   include,
   exclude,
-}: VitePluginOptions): Plugin => {
+}: Options): Plugin => {
   let filter: ReturnType<typeof import('vite')['createFilter']>
-  let artifact: Artifact = artifactDirectory
+  let artifact: transform.Artifact = artifactDirectory
   let ctx: Context
 
   return {
@@ -84,4 +79,8 @@ export const vitePlugin = ({
       }
     },
   }
+}
+
+export declare namespace vitePlugin {
+  export type { Options }
 }
