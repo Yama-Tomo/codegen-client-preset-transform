@@ -16,7 +16,7 @@ jobs:
         with:
           node-version: "18"
           registry-url: 'https://registry.npmjs.org'
-      - run: yarn install --immutable --immutable-cache --check-cache
+      - run: yarn install --immutable --immutable-cache
       - run: yarn
       - run: yarn lint
       - run: yarn test
