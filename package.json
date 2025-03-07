@@ -1,6 +1,6 @@
 {
   "name": "@yamatomo/codegen-client-preset-transform",
-  "version": "0.0.1",
+  "version": "0.1.0-beta.1",
   "license": "MIT",
   "homepage": "https://github.com/Yama-Tomo/codegen-client-preset-transform",
   "repository": {
