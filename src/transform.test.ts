@@ -49,7 +49,7 @@ const UserFragment = _transformed_UserFragmentFragmentDoc
 const Query = _transformed_UsersQueryDocument
 
 const User = (props: { user: FragmentType<typeof UserFragment> }) => {
-  const user = props.user
+  const user = (props.user)
   return <div>{user.name}:{user.id}</div>
 }
 
@@ -75,7 +75,7 @@ const UserFragment = _transformed_UserFragmentFragmentDoc
 const Query = _transformed_UsersQueryDocument
 
 const User = (props: { user: FragmentType<typeof UserFragment> }) => {
-  const user = props.user
+  const user = (props.user)
   return <div>{user.name}:{user.id}</div>
 }
 

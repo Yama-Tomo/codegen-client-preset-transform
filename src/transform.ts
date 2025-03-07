@@ -73,7 +73,7 @@ const inlineUseFragmentCall = (
   const useFragmentSecondArg = secondArg.getText(sourceFile)
   transformData.codes.push({
     from: useFragmentCallExpression,
-    to: useFragmentSecondArg,
+    to: `(${useFragmentSecondArg})`,
   })
 }
 
